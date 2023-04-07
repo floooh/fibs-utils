@@ -1,3 +1,33 @@
+/*
+    copyfiles: copy files from source to destination dir
+      srcDir?: string - base dir to copy from (default: @targetsources:)
+      dstDir?: string - base dir to copy to (default: @targetassets:)
+      files: string[] - list of files to copy
+
+    First import the job like this:
+
+    imports: {
+        utils: {
+            url: 'https://github.com/floooh/fibs-utils',
+            import: [ 'copyfiles.ts' ]
+        }
+    },
+
+    Now you can run 'fibs list jobs' to get a description of the
+
+    Then add a build job to any targets which need to copy files:
+
+    jobs: [
+        {
+            job: 'copyfiles',
+            args: {
+                srcDir: '@targetsources:assets',
+                files: [ 'bla.png', 'blub.png' ],
+            }
+        }
+    ]
+*/
+
 import { fs, path, fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
