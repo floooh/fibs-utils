@@ -3,7 +3,7 @@ import { fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
     // language standards
-    variables: {
+    cmakeVariables: {
         CMAKE_C_STANDARD: '11',
         CMAKE_CXX_STANDARD: '14',
     },
