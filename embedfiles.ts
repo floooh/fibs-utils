@@ -38,7 +38,7 @@ export function validate(args: EmbedFilesArgs): fibs.JobValidateResult {
 
 export function builder(args: EmbedFilesArgs): fibs.JobBuilder {
     const { dir = '@targetsources', files, outHeader } = args;
-    return (context: fibs.TargetBuildContext): fibs.Job => {
+    return (context: fibs.TargetContext): fibs.Job => {
         const target = context.target;
         const aliasMap = fibs.util.buildAliasMap({
             project: context.project,

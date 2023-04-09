@@ -68,7 +68,7 @@ function builder(args: CopyFilesArgs): fibs.JobBuilder {
         dstDir = '@targetassets:',
         files,
     } = args;
-    return (context: fibs.TargetBuildContext): fibs.Job => {
+    return (context: fibs.TargetContext): fibs.Job => {
         const target = context.target;
         const aliasMap = fibs.util.buildAliasMap({
             project: context.project,
