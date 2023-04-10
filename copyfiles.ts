@@ -62,24 +62,17 @@ function validate(args: CopyFilesArgs): fibs.JobValidateResult {
     }
 }
 
-function builder(args: CopyFilesArgs): fibs.JobBuilder {
+function builder(args: CopyFilesArgs): fibs.JobFunc {
     const {
         srcDir = '@targetsources:',
         dstDir = '@targetassets:',
         files,
     } = args;
-    return (context: fibs.TargetContext): fibs.Job => {
-        const target = context.target;
-        const aliasMap = fibs.util.buildAliasMap({
-            project: context.project,
-            config: context.config,
-            target: context.target,
-            selfDir: target.importDir
-        });
+    return (ctx): fibs.Job => {
         return {
             name: 'copyfiles',
-            inputs: files.map((file) => fibs.util.resolvePath(aliasMap, srcDir, file)),
-            outputs: files.map((file) => fibs.util.resolvePath(aliasMap, dstDir, file)),
+            inputs: files.map((file) => fibs.util.resolvePath(ctx.aliasMap, srcDir, file)),
+            outputs: files.map((file) => fibs.util.resolvePath(ctx.aliasMap, dstDir, file)),
             addOutputsToTargetSources: false,
             args: { srcDir, dstDir, files },
             func: async (inputs: string[], outputs: string[], args: CopyFilesArgs): Promise<void> => {

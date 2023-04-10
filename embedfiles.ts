@@ -36,20 +36,13 @@ export function validate(args: EmbedFilesArgs): fibs.JobValidateResult {
     };
 }
 
-export function builder(args: EmbedFilesArgs): fibs.JobBuilder {
+export function builder(args: EmbedFilesArgs): fibs.JobFunc {
     const { dir = '@targetsources', files, outHeader } = args;
-    return (context: fibs.TargetContext): fibs.Job => {
-        const target = context.target;
-        const aliasMap = fibs.util.buildAliasMap({
-            project: context.project,
-            config: context.config,
-            target: context.target,
-            selfDir: target.importDir
-        });
+    return (ctx: fibs.Context): fibs.Job => {
         return {
             name: 'embedfile',
-            inputs: files.map((file) => fibs.util.resolvePath(aliasMap, dir, file)),
-            outputs: [fibs.util.resolvePath(aliasMap, outHeader)],
+            inputs: files.map((file) => fibs.util.resolvePath(ctx.aliasMap, dir, file)),
+            outputs: [fibs.util.resolvePath(ctx.aliasMap, outHeader)],
             addOutputsToTargetSources: true,
             args: { dir, files, outHeader },
             func: async (inputs: string[], outputs: string[], args: EmbedFilesArgs): Promise<void> => {
