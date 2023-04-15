@@ -5,9 +5,9 @@
 import { fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
-    jobs: {
-        'embedfiles': { help, validate, builder }
-    }
+    jobs: [
+        { name: 'embedfiles', help, validate, builder }
+    ]
 }
 
 function help() {

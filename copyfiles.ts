@@ -31,9 +31,9 @@
 import { fs, path, fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
-    jobs: {
-        'copyfiles': { help, validate, builder }
-    }
+    jobs: [
+        { name: 'copyfiles', help, validate, builder },
+    ]
 }
 
 function help() {
