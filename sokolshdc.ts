@@ -64,7 +64,7 @@ function validate(args: SokolShdcArgs): fibs.JobValidateResult {
 }
 
 function getShdcPath(ctx: fibs.Context): string {
-    const base = '@imports:sokol-tools-bin/bin'
+    const base = '@imports:sokol-shdc/bin'
     let dir;
     if (ctx.host.platform === 'windows') {
         dir = 'win32';
