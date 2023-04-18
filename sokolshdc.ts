@@ -1,7 +1,7 @@
 /*
     sokolshdc: fibs job definitions for the Sokol shader compiler.
 
-
+    // FIXME: description
 */
 import { fibs, path } from './deps.ts';
 
@@ -64,7 +64,7 @@ function validate(args: SokolShdcArgs): fibs.JobValidateResult {
 }
 
 function getShdcPath(ctx: fibs.Context): string {
-    const base = '@imports:sokol-shdc/bin'
+    const base = '@imports:sokol-tools-bin/bin'
     let dir;
     if (ctx.host.platform === 'windows') {
         dir = 'win32';
