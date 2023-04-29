@@ -3,7 +3,7 @@
 
     // FIXME: description
 */
-import { fibs, path } from './deps.ts';
+import { fibs, fs, path } from './deps.ts';
 
 const VERSION = 1;
 
@@ -155,6 +155,7 @@ function builder(args: SokolShdcArgs): fibs.JobFunc {
             },
             func: async (inputs: string[], outputs: string[], args: SokolShdcArgs) => {
                 if (fibs.util.dirty(inputs, outputs)) {
+                    await fs.ensureDir(path.dirname(outputs[0]));
                     const shdcArgs = [
                         '--input', inputs[0],
                         '--output', outputs[0],
