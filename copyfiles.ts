@@ -75,14 +75,14 @@ function builder(args: CopyFilesArgs): fibs.JobFunc {
             outputs: files.map((file) => fibs.util.resolvePath(ctx.aliasMap, dstDir, file)),
             addOutputsToTargetSources: false,
             args: { srcDir, dstDir, files },
-            func: async (inputs: string[], outputs: string[], args: CopyFilesArgs): Promise<void> => {
+            func: async (inputs: string[], outputs: string[], _args: CopyFilesArgs): Promise<void> => {
                 if (fibs.util.dirty(inputs, outputs)) {
                     for (let i = 0; i < inputs.length; i++) {
                         const from = inputs[i];
                         const to = outputs[i];
                         fibs.log.info(`# cp ${from} ${to}`);
-                        fs.ensureDirSync(path.dirname(to));
-                        fs.copySync(from, to, { overwrite: true });
+                        await fs.ensureDir(path.dirname(to));
+                        await fs.copy(from, to, { overwrite: true });
                     }
                 }
             },
