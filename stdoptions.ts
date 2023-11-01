@@ -2,27 +2,27 @@
 import { fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
-    // language standards
-    cmakeVariables: {
-        CMAKE_C_STANDARD: '11',
-        CMAKE_CXX_STANDARD: '14',
-    },
+  // language standards
+  cmakeVariables: {
+    CMAKE_C_STANDARD: '11',
+    CMAKE_CXX_STANDARD: '14',
+  },
 
-    // increase warning levels
-    compileOptions: (context) => {
-        if (context.compiler === 'msvc') {
-            return [ '/W4' ];
-        } else {
-            return [ '-Wall', '-Wextra' ];
-        }
-    },
+  // increase warning levels
+  compileOptions: (context) => {
+    if (context.compiler === 'msvc') {
+      return ['/W4'];
+    } else {
+      return ['-Wall', '-Wextra'];
+    }
+  },
 
-    // on Emscripten, use our custom shell.html for all exe targets
-    linkOptions: (context) => {
-        if (context.config.platform === 'emscripten') {
-            return [ '--shell-file', '@imports:fibs-utils/shell.html' ];
-        } else {
-            return [];
-        }
-    },
-}
+  // on Emscripten, use our custom shell.html for all exe targets
+  linkOptions: (context) => {
+    if (context.config.platform === 'emscripten') {
+      return ['--shell-file', '@imports:fibs-utils/shell.html'];
+    } else {
+      return [];
+    }
+  },
+};
