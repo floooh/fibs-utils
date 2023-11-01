@@ -7,33 +7,6 @@ import { fibs, fs, path } from './deps.ts';
 
 const VERSION = 1;
 
-export const project: fibs.ProjectDesc = {
-  imports: [
-    {
-      name: 'sokol-shdc',
-      url: 'https://github.com/floooh/sokol-tools-bin',
-    },
-  ],
-  jobs: [
-    { 'name': 'sokolshdc', help, validate, builder },
-  ],
-};
-
-function help() {
-  fibs.log.helpJob('sokolshdc', [
-    { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: @targetsources:)' },
-    { name: 'outDir?', type: 'string', desc: 'optional output directory (default: @targetbuild:)' },
-    { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
-    { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
-    { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: derived from build config)' },
-    { name: 'fmt?', type: 'string', desc: 'optional output format (default: sokol)' },
-    { name: 'defines?', type: 'string[]', desc: 'optional shader compilation definitions' },
-    { name: 'module?', type: 'string', desc: 'optional module prefix override' },
-    { name: 'reflection?', type: 'boolean', desc: 'enable/disable reflection generation' },
-    { name: 'errfmt?', type: 'string', desc: 'error output format (gcc or msvc)' },
-  ], 'run sokol shader compiler');
-}
-
 type SokolShdcArgs = {
   srcDir?: string;
   outDir?: string;
@@ -47,21 +20,121 @@ type SokolShdcArgs = {
   errfmt?: string;
 };
 
-function validate(args: SokolShdcArgs): fibs.JobValidateResult {
-  const res = fibs.util.validateArgs(args, {
-    srcDir: { type: 'string', optional: true },
-    outDir: { type: 'string', optional: true },
-    src: { type: 'string', optional: false },
-    out: { type: 'string', optional: true },
-    slang: { type: 'string', optional: true },
-    fmt: { type: 'string', optional: true },
-    defines: { type: 'string[]', optional: true },
-    module: { type: 'string', optional: true },
-    reflection: { type: 'boolean', optional: true },
-    errfmt: { type: 'string', optional: true },
-  });
-  return { valid: res.valid, hints: res.hints };
-}
+export const project: fibs.ProjectDesc = {
+  imports: [
+    {
+      name: 'sokol-shdc',
+      url: 'https://github.com/floooh/sokol-tools-bin',
+    },
+  ],
+  jobs: [
+    {
+      'name': 'sokolshdc',
+      help: () => {
+        fibs.log.helpJob('sokolshdc', [
+          { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: @targetsources:)' },
+          { name: 'outDir?', type: 'string', desc: 'optional output directory (default: @targetbuild:)' },
+          { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
+          { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
+          { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: derived from build config)' },
+          { name: 'fmt?', type: 'string', desc: 'optional output format (default: sokol)' },
+          { name: 'defines?', type: 'string[]', desc: 'optional shader compilation definitions' },
+          { name: 'module?', type: 'string', desc: 'optional module prefix override' },
+          { name: 'reflection?', type: 'boolean', desc: 'enable/disable reflection generation' },
+          { name: 'errfmt?', type: 'string', desc: 'error output format (gcc or msvc)' },
+        ], 'run sokol shader compiler');
+      },
+      validate: (args: SokolShdcArgs) => {
+        const res = fibs.util.validateArgs(args, {
+          srcDir: { type: 'string', optional: true },
+          outDir: { type: 'string', optional: true },
+          src: { type: 'string', optional: false },
+          out: { type: 'string', optional: true },
+          slang: { type: 'string', optional: true },
+          fmt: { type: 'string', optional: true },
+          defines: { type: 'string[]', optional: true },
+          module: { type: 'string', optional: true },
+          reflection: { type: 'boolean', optional: true },
+          errfmt: { type: 'string', optional: true },
+        });
+        return { valid: res.valid, hints: res.hints };
+      },
+      builder: (args: SokolShdcArgs) => {
+        const {
+          srcDir = '@targetsources:',
+          outDir = '@targetbuild:',
+          src,
+          out = `${path.basename(src)}.h`,
+          slang,
+          fmt = 'sokol',
+          defines,
+          module,
+          reflection = false,
+          errfmt,
+        } = args;
+        return (ctx) => {
+          return {
+            name: 'sokolshdc',
+            inputs: [fibs.util.resolvePath(ctx.aliasMap, srcDir, src)],
+            outputs: [fibs.util.resolvePath(ctx.aliasMap, outDir, out)],
+            addOutputsToTargetSources: true,
+            args: {
+              srcDir,
+              outDir,
+              src,
+              out,
+              slang,
+              fmt,
+              defines,
+              module,
+              reflection,
+              errfmt,
+            },
+            func: async (inputs: string[], outputs: string[], args: SokolShdcArgs) => {
+              if (fibs.util.dirty(inputs, outputs)) {
+                await fs.ensureDir(path.dirname(outputs[0]));
+                const shdcArgs = [
+                  '--input',
+                  inputs[0],
+                  '--output',
+                  outputs[0],
+                  '--genver',
+                  `${VERSION}`,
+                  '--slang',
+                  getSlang(ctx, args.slang),
+                  '--errfmt',
+                  getErrFmt(ctx, args.errfmt),
+                  '--format',
+                  args.fmt!,
+                  '--bytecode',
+                ];
+                if (args.defines !== undefined) {
+                  shdcArgs.push('--defines', ...args.defines);
+                }
+                if (args.module !== undefined) {
+                  shdcArgs.push('--module', args.module);
+                }
+                if (args.reflection === true) {
+                  shdcArgs.push('--reflection');
+                }
+                const res = await fibs.util.runCmd(getShdcPath(ctx), {
+                  args: shdcArgs,
+                  cwd: ctx.project.dir,
+                  showCmd: true,
+                  abortOnError: false,
+                  winUseCmd: true,
+                });
+                if (res.exitCode !== 0) {
+                  throw new Error(`sokol-shdc failed with exit code ${res.exitCode}`);
+                }
+              }
+            },
+          };
+        };
+      },
+    },
+  ],
+};
 
 function getShdcPath(ctx: fibs.Context): string {
   const base = '@imports:sokol-tools-bin/bin';
@@ -126,78 +199,4 @@ function getErrFmt(ctx: fibs.Context, errfmt: string | undefined): string {
       return 'gcc';
     }
   }
-}
-
-function builder(args: SokolShdcArgs): fibs.JobFunc {
-  const {
-    srcDir = '@targetsources:',
-    outDir = '@targetbuild:',
-    src,
-    out = `${path.basename(src)}.h`,
-    slang,
-    fmt = 'sokol',
-    defines,
-    module,
-    reflection = false,
-    errfmt,
-  } = args;
-  return (ctx) => {
-    return {
-      name: 'sokolshdc',
-      inputs: [fibs.util.resolvePath(ctx.aliasMap, srcDir, src)],
-      outputs: [fibs.util.resolvePath(ctx.aliasMap, outDir, out)],
-      addOutputsToTargetSources: true,
-      args: {
-        srcDir,
-        outDir,
-        src,
-        out,
-        slang,
-        fmt,
-        defines,
-        module,
-        reflection,
-        errfmt,
-      },
-      func: async (inputs: string[], outputs: string[], args: SokolShdcArgs) => {
-        if (fibs.util.dirty(inputs, outputs)) {
-          await fs.ensureDir(path.dirname(outputs[0]));
-          const shdcArgs = [
-            '--input',
-            inputs[0],
-            '--output',
-            outputs[0],
-            '--genver',
-            `${VERSION}`,
-            '--slang',
-            getSlang(ctx, args.slang),
-            '--errfmt',
-            getErrFmt(ctx, args.errfmt),
-            '--format',
-            args.fmt!,
-            '--bytecode',
-          ];
-          if (args.defines !== undefined) {
-            shdcArgs.push('--defines', ...args.defines);
-          }
-          if (args.module !== undefined) {
-            shdcArgs.push('--module', args.module);
-          }
-          if (args.reflection === true) {
-            shdcArgs.push('--reflection');
-          }
-          const res = await fibs.util.runCmd(getShdcPath(ctx), {
-            args: shdcArgs,
-            cwd: ctx.project.dir,
-            showCmd: true,
-            abortOnError: false,
-            winUseCmd: true,
-          });
-          if (res.exitCode !== 0) {
-            throw new Error(`sokol-shdc failed with exit code ${res.exitCode}`);
-          }
-        }
-      },
-    };
-  };
 }
