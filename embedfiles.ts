@@ -1,8 +1,9 @@
 /*
     FIXME: describe embedfiles
 */
-
-import { fibs, fs, path } from './deps.ts';
+import * as fs from '$std/fs/mod.ts';
+import * as path from '$std/path/mod.ts';
+import * as fibs from '$fibs/mod.ts';
 
 type EmbedFilesArgs = {
   dir?: string;
