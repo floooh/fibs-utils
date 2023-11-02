@@ -1,5 +1,5 @@
 // a collection of 'opinionated' standard compile options for inclusion in other projects
-import * as fibs from '$fibs/mod.ts';
+import { fibs } from './deps.ts';
 
 export const project: fibs.ProjectDesc = {
   // language standards

@@ -3,9 +3,7 @@
 
     // FIXME: description
 */
-import * as fs from '$std/fs/mod.ts';
-import * as path from '$std/path/mod.ts';
-import * as fibs from '$fibs/mod.ts';
+import { fibs, fs, path } from './deps.ts';
 
 const VERSION = 1;
 
