@@ -16,13 +16,4 @@ export const project: fibs.ProjectDesc = {
       return ['-Wall', '-Wextra'];
     }
   },
-
-  // on Emscripten, use our custom shell.html for all exe targets
-  linkOptions: (context) => {
-    if (context.config.platform === 'emscripten') {
-      return ['--shell-file', '@imports:fibs-utils/shell.html'];
-    } else {
-      return [];
-    }
-  },
 };
