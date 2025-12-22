@@ -60,7 +60,7 @@ function buildJob(args: CopyFilesArgs) {
         dstDir = '@targetassets:',
         files,
     } = args;
-    return (p: fibs.Project): fibs.Job => ({
+    return (p: fibs.Project, t: fibs.Target): fibs.Job => ({
         name: 'copyfiles',
         inputs: files.map((file) => `${srcDir}/${file}`),
         outputs: files.map((file) => `${dstDir}/${file}`),
