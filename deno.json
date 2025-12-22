@@ -1,21 +1,21 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true
-  },
-  "fmt": {
-    "useTabs": false,
-    "indentWidth": 2,
-    "singleQuote": true,
-    "lineWidth": 140
-  },
-  "lint": {
-    "rules": {
-      "tags": [],
-      "exclude": ["require-await"]
+    "compilerOptions": {
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true
+    },
+    "fmt": {
+        "useTabs": false,
+        "indentWidth": 4,
+        "singleQuote": true,
+        "lineWidth": 140
+    },
+    "lint": {
+        "rules": {
+            "tags": [],
+            "exclude": ["require-await"]
+        }
     }
-  }
 }
