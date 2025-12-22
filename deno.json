@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
     "strict": true,
-    "allowJs": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "checkJs": true
+    "strictNullChecks": true
   },
   "fmt": {
     "useTabs": false,
@@ -17,8 +15,7 @@
   "lint": {
     "rules": {
       "tags": [],
-      "exclude": ["require-await"],
-      "include": ["recommended", "eqeqeq", "camelcase", "no-extra-semi"]
+      "exclude": ["require-await"]
     }
   }
 }

@@ -1,3 +1,3 @@
-export * as fibs from 'https://deno.land/x/fibs@v1.6.0/mod.ts';
-export * as path from 'https://deno.land/std@0.204.0/path/mod.ts';
-export * as fs from 'https://deno.land/std@0.204.0/fs/mod.ts';
+export * as fibs from 'https://raw.githubusercontent.com/floooh/fibs/master/index.ts';
+export * as fs from 'jsr:@std/fs';
+export * as path from 'jsr:@std/path';
