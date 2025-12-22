@@ -20,7 +20,7 @@
     b.addJob({
       job: 'copyfiles',
       args: {
-          srcDir: '@targetsources:assets',
+          srcDir: '@targetdir:assets',
           files: [ 'bla.png', 'blub.png' ],
       },
     });
