@@ -1,6 +1,6 @@
 /*
     copyfiles: copy files from source to destination dir
-      srcDir?: string - base dir to copy from (default: @targetsources:)
+      srcDir?: string - base dir to copy from (default: @targetdir:)
       dstDir?: string - base dir to copy to (default: @targetassets:)
       files: string[] - list of files to copy
 
@@ -40,7 +40,7 @@ export function configure(c: fibs.Configurer) {
 
 function help() {
     fibs.log.helpJob('copyfiles', [
-        { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: @targetsources:)' },
+        { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: @targetdir:)' },
         { name: 'dstDir?', type: 'string', desc: 'base dir to copy to (default: @targetassets:)' },
         { name: 'files', type: 'string[]', desc: 'list of files to copy' },
     ], 'copy files from source to destination dir');
@@ -56,7 +56,7 @@ function validate(args: CopyFilesArgs) {
 
 function buildJob(args: CopyFilesArgs) {
     const {
-        srcDir = '@targetsources:',
+        srcDir = '@targetdir:',
         dstDir = '@targetassets:',
         files,
     } = args;

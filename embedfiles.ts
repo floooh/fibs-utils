@@ -18,7 +18,7 @@ export const project: fibs.ProjectDesc = {
             name: 'embedfiles',
             help: () => {
                 fibs.log.helpJob('embedfiles', [
-                    { name: 'dir?', type: 'string', desc: 'base directory of files to embed (default: @targetsources)' },
+                    { name: 'dir?', type: 'string', desc: 'base directory of files to embed (default: @targetdir)' },
                     { name: 'files', type: 'string[]', desc: 'list of files to embed' },
                     { name: 'outHeader', type: 'string', desc: 'path of generated header file' },
                     { name: 'prefix?', type: 'string', desc: "optional prefix for C array name (default: 'embed_')" },
@@ -40,7 +40,7 @@ export const project: fibs.ProjectDesc = {
             },
             builder: (args: EmbedFilesArgs) => {
                 const {
-                    dir = '@targetsources',
+                    dir = '@targetdir',
                     files,
                     outHeader,
                     prefix = 'embed_',

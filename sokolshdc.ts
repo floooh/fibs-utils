@@ -30,7 +30,7 @@ export function configure(c: fibs.Configurer) {
 
 function help() {
     fibs.log.helpJob('sokolshdc', [
-        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: @targetsources:)' },
+        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: @targetdir:)' },
         { name: 'outDir?', type: 'string', desc: 'optional output directory (default: @targetbuild:)' },
         { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
         { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
@@ -60,7 +60,7 @@ function validate(args: SokolShdcArgs) {
 
 function buildJob(args: SokolShdcArgs) {
     const {
-        srcDir = '@targetsources:',
+        srcDir = '@targetdir:',
         outDir = '@targetbuild:',
         src,
         out = `${path.basename(src)}.h`,
