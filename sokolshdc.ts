@@ -143,7 +143,6 @@ function getShdcPath(p: fibs.Project): string {
 }
 
 function getErrFmt(p: fibs.Project, errfmt: string | undefined): string {
-    console.log(`sokolshdc.getErrFmt: compiler is ${p.compiler()}`);
     if (errfmt !== undefined) {
         return errfmt;
     } else if (p.isMsvc()) {
