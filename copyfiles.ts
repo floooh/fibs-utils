@@ -17,10 +17,10 @@
 
     Then add a build job to any targets which need to copy files:
 
-    b.addJob({
+    targetBuilder.addJob({
       job: 'copyfiles',
       args: {
-          srcDir: '@targetdir:assets',
+          srcDir: `assets', // relative to target.dir
           files: [ 'bla.png', 'blub.png' ],
       },
     });
@@ -54,13 +54,13 @@ function validate(args: CopyFilesArgs) {
     });
 }
 
-function buildJob(args: CopyFilesArgs) {
+function buildJob(p: fibs.Project, t: fibs.Target, args: CopyFilesArgs) {
     const {
-        srcDir = '@targetdir:',
-        dstDir = '@targetassets:',
+        srcDir = t.dir,
+        dstDir = p.targetAssetsDir(t.name),
         files,
     } = args;
-    return (p: fibs.Project, t: fibs.Target): fibs.Job => ({
+    return {
         name: 'copyfiles',
         inputs: files.map((file) => `${srcDir}/${file}`),
         outputs: files.map((file) => `${dstDir}/${file}`),
@@ -77,5 +77,5 @@ function buildJob(args: CopyFilesArgs) {
                 }
             }
         },
-    });
+    };
 }

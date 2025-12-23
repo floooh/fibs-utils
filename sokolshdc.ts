@@ -30,8 +30,8 @@ export function configure(c: fibs.Configurer) {
 
 function help() {
     fibs.log.helpJob('sokolshdc', [
-        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: @targetdir:)' },
-        { name: 'outDir?', type: 'string', desc: 'optional output directory (default: @targetbuild:)' },
+        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: targetDir)' },
+        { name: 'outDir?', type: 'string', desc: 'optional output directory (default: targetBuildDir)' },
         { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
         { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
         { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: derived from build config)' },
@@ -58,10 +58,10 @@ function validate(args: SokolShdcArgs) {
     });
 }
 
-function buildJob(args: SokolShdcArgs) {
+function buildJob(p: fibs.Project, t: fibs.Target, args: SokolShdcArgs) {
     const {
-        srcDir = '@targetdir:',
-        outDir = '@targetbuild:',
+        srcDir = t.dir,
+        outDir = p.targetBuildDir(t.name),
         src,
         out = `${path.basename(src)}.h`,
         slang,
@@ -71,7 +71,7 @@ function buildJob(args: SokolShdcArgs) {
         reflection = false,
         errfmt,
     } = args;
-    return (p: fibs.Project, t: fibs.Target): fibs.Job => ({
+    return {
         name: 'sokolshdc',
         inputs: [`${srcDir}/${src}`],
         outputs: [`${outDir}/${out}`],
@@ -127,7 +127,7 @@ function buildJob(args: SokolShdcArgs) {
                 }
             }
         },
-    });
+    };
 }
 
 function getShdcPath(p: fibs.Project): string {
