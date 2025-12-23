@@ -144,44 +144,45 @@ function getShdcPath(p: fibs.Project): string {
 
 function getDefaultSlang(p: fibs.Project): string {
     if (p.findCompileDefinition('SOKOL_GLCORE')) {
-        fibs.log.info('# sokolshdc: found SOKOL_GLCORE, using glsl430');
+        fibs.log.info('# sokolshdc: found SOKOL_GLCORE definition, using glsl430');
         return 'glsl430';
     } else if (p.findCompileDefinition('SOKOL_GLES3')) {
         if (p.isAndroid()) {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 on Android, using gles310es');
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using gles310es');
             return 'gles310es';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3, using gles310es');
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using gles310es');
             return 'gles300es';
         }
     } else if (p.findCompileDefinition('SOKOL_D3D11')) {
-        fibs.log.info('# sokolshdc: found SOKOL_D3D11, using hlsl5');
+        fibs.log.info('# sokolshdc: found SOKOL_D3D11 definition, using hlsl5');
         return 'hlsl5';
     } else if (p.findCompileDefinition('SOKOL_METAL')) {
         if (p.isMacOS()) {
-            fibs.log.info('# sokolshdc: found SOKOL_METAL on macOS, using metal_macos');
+            fibs.log.info('# sokolshdc: found SOKOL_METAL definition and macos platform, using metal_macos');
             return 'metal_macos';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_METAL on iOS, using metal_ios');
+            fibs.log.info('# sokolshdc: found SOKOL_METAL definition and ios platform, using metal_ios');
             return 'metal_ios';
         }
     } else if (p.findCompileDefinition('SOKOL_WGPU')) {
-        fibs.log.info('# sokolshdc: found SOKOL_WGPU, using wgsl');
+        fibs.log.info('# sokolshdc: found SOKOL_WGPU definition, using wgsl');
         return 'wgsl';
     } else if (p.findCompileDefinition('SOKOL_VULKAN')) {
-        fibs.log.info('# sokolshdc: found SOKOL_VULKAN, using spirv_vk');
+        fibs.log.info('# sokolshdc: found SOKOL_VULKAN definition, using spirv_vk');
         return 'spirv_vk';
     } else {
         // no platform definition found, use
-        fibs.log.info('# sokolshdc: no SOKOL_* backend definition found');
+        let slang = 'glsl430'
         switch (p.platform()) {
-            case 'macos': return 'metal_macos';
-            case 'ios': return 'metal_ios';
-            case 'windows': return 'hlsl5';
-            case 'emscripten': return 'glsl300es';
-            case 'android': return 'glsl300es';
-            default: return 'glsl430';
+            case 'macos': slang = 'metal_macos'; break;
+            case 'ios': slang = 'metal_ios'; break;
+            case 'windows': slang = 'hlsl5'; break;
+            case 'emscripten': slang = 'glsl300es'; break;
+            case 'android': slang = 'glsl300es'; break;
         }
+        fibs.log.info(`# sokolshdc: no SOKOL_* backend definition found, selected ${slang}`);
+        return slang;
     }
 }
 
