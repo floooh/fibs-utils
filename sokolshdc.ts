@@ -12,7 +12,7 @@ type SokolShdcArgs = {
     outDir?: string;
     src: string;
     out?: string;
-    slang: string;
+    slang?: string;
     fmt?: string;
     defines?: string[];
     module?: string;
@@ -34,7 +34,7 @@ function help() {
         { name: 'outDir?', type: 'string', desc: 'optional output directory (default: project.targetBuildDir())' },
         { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
         { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
-        { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: derived from build config)' },
+        { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: dervived from build config)' },
         { name: 'fmt?', type: 'string', desc: 'optional output format (default: sokol)' },
         { name: 'defines?', type: 'string[]', desc: 'optional shader compilation definitions' },
         { name: 'module?', type: 'string', desc: 'optional module prefix override' },
@@ -64,7 +64,7 @@ function buildJob(p: fibs.Project, t: fibs.Target, args: SokolShdcArgs) {
         outDir = p.targetBuildDir(t.name),
         src,
         out = `${path.basename(src)}.h`,
-        slang,
+        slang = getDefaultSlang(p),
         fmt = 'sokol',
         defines,
         module,
@@ -140,6 +140,49 @@ function getShdcPath(p: fibs.Project): string {
         dir = 'linux';
     }
     return `${p.importsDir()}/sokol-tools-bin/bin/${dir}/sokol-shdc`;
+}
+
+function getDefaultSlang(p: fibs.Project): string {
+    if (p.findCompileDefinition('SOKOL_GLCORE')) {
+        fibs.log.info('# sokolshdc: found SOKOL_GLCORE, using glsl430');
+        return 'glsl430';
+    } else if (p.findCompileDefinition('SOKOL_GLES3')) {
+        if (p.isAndroid()) {
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 on Android, using gles310es');
+            return 'gles310es';
+        } else {
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3, using gles310es');
+            return 'gles300es';
+        }
+    } else if (p.findCompileDefinition('SOKOL_D3D11')) {
+        fibs.log.info('# sokolshdc: found SOKOL_D3D11, using hlsl5');
+        return 'hlsl5';
+    } else if (p.findCompileDefinition('SOKOL_METAL')) {
+        if (p.isMacOS()) {
+            fibs.log.info('# sokolshdc: found SOKOL_METAL on macOS, using metal_macos');
+            return 'metal_macos';
+        } else {
+            fibs.log.info('# sokolshdc: found SOKOL_METAL on iOS, using metal_ios');
+            return 'metal_ios';
+        }
+    } else if (p.findCompileDefinition('SOKOL_WGPU')) {
+        fibs.log.info('# sokolshdc: found SOKOL_WGPU, using wgsl');
+        return 'wgsl';
+    } else if (p.findCompileDefinition('SOKOL_VULKAN')) {
+        fibs.log.info('# sokolshdc: found SOKOL_VULKAN, using spirv_vk');
+        return 'spirv_vk';
+    } else {
+        // no platform definition found, use
+        fibs.log.info('# sokolshdc: no SOKOL_* backend definition found');
+        switch (p.platform()) {
+            case 'macos': return 'metal_macos';
+            case 'ios': return 'metal_ios';
+            case 'windows': return 'hlsl5';
+            case 'emscripten': return 'glsl300es';
+            case 'android': return 'glsl300es';
+            default: return 'glsl430';
+        }
+    }
 }
 
 function getErrFmt(p: fibs.Project, errfmt: string | undefined): string {
