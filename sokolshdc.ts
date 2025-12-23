@@ -30,8 +30,8 @@ export function configure(c: fibs.Configurer) {
 
 function help() {
     fibs.log.helpJob('sokolshdc', [
-        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: targetDir)' },
-        { name: 'outDir?', type: 'string', desc: 'optional output directory (default: targetBuildDir)' },
+        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: target.dir)' },
+        { name: 'outDir?', type: 'string', desc: 'optional output directory (default: project.targetBuildDir())' },
         { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
         { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
         { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: derived from build config)' },
