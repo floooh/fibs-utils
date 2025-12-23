@@ -148,11 +148,11 @@ function getDefaultSlang(p: fibs.Project): string {
         return 'glsl430';
     } else if (p.findCompileDefinition('SOKOL_GLES3')) {
         if (p.isAndroid()) {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using gles310es');
-            return 'gles310es';
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using glsl310es');
+            return 'glsl310es';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using gles310es');
-            return 'gles300es';
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using glsl310es');
+            return 'glsl300es';
         }
     } else if (p.findCompileDefinition('SOKOL_D3D11')) {
         fibs.log.info('# sokolshdc: found SOKOL_D3D11 definition, using hlsl5');
