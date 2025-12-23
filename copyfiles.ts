@@ -1,7 +1,7 @@
 /*
     copyfiles: copy files from source to destination dir
-      srcDir?: string - base dir to copy from (default: @targetdir:)
-      dstDir?: string - base dir to copy to (default: @targetassets:)
+      srcDir?: string - base dir to copy from (default: target.dir)
+      dstDir?: string - base dir to copy to (default: project.targetAssetsDir())
       files: string[] - list of files to copy
 
     First import the job like this:
