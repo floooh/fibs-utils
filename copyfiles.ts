@@ -40,8 +40,8 @@ export function configure(c: fibs.Configurer) {
 
 function help() {
     fibs.log.helpJob('copyfiles', [
-        { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: @targetdir:)' },
-        { name: 'dstDir?', type: 'string', desc: 'base dir to copy to (default: @targetassets:)' },
+        { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: target.dir)' },
+        { name: 'dstDir?', type: 'string', desc: 'base dir to copy to (default: project.targetAssetdDir())' },
         { name: 'files', type: 'string[]', desc: 'list of files to copy' },
     ], 'copy files from source to destination dir');
 }
