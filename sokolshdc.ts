@@ -58,10 +58,10 @@ function validate(args: SokolShdcArgs) {
     });
 }
 
-function buildJob(p: fibs.Project, t: fibs.Target, args: SokolShdcArgs) {
+function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: SokolShdcArgs) {
     const {
         srcDir = t.dir,
-        outDir = p.targetBuildDir(t.name),
+        outDir = p.targetBuildDir(t.name, c.name),
         src,
         out = `${path.basename(src)}.h`,
         slang = getDefaultSlang(p),

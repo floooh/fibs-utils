@@ -54,10 +54,10 @@ function validate(args: CopyFilesArgs) {
     });
 }
 
-function buildJob(p: fibs.Project, t: fibs.Target, args: CopyFilesArgs) {
+function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: CopyFilesArgs) {
     const {
         srcDir = t.dir,
-        dstDir = p.targetAssetsDir(t.name),
+        dstDir = p.targetAssetsDir(t.name, c.name),
         files,
     } = args;
     return {
