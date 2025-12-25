@@ -151,7 +151,7 @@ function getDefaultSlang(p: fibs.Project): string {
             fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using glsl310es');
             return 'glsl310es';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using glsl310es');
+            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using glsl300es');
             return 'glsl300es';
         }
     } else if (p.findCompileDefinition('SOKOL_D3D11')) {
