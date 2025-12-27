@@ -1,5 +1,5 @@
 // a collection of 'opinionated' standard compile options for inclusion in other projects
-import { fibs } from './deps.ts';
+import * as fibs from '@floooh/fibs';
 
 export function build(b: fibs.Builder) {
     if (b.isMsvc()) {

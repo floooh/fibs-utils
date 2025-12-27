@@ -25,8 +25,9 @@
       },
     });
 */
-
-import { fibs, fs, path } from './deps.ts';
+import * as fibs from '@floooh/fibs';
+import * as fs from '@std/fs';
+import * as path from '@std/path'
 
 type CopyFilesArgs = {
     srcDir?: string;
