@@ -51,7 +51,7 @@ function validate(args: SokolShdcArgs) {
         outDir: { type: 'string', optional: true },
         src: { type: 'string', optional: false },
         out: { type: 'string', optional: true },
-        slang: { type: 'string', optional: false },
+        slang: { type: 'string', optional: true },
         fmt: { type: 'string', optional: true },
         defines: { type: 'string[]', optional: true },
         module: { type: 'string', optional: true },
