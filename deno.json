@@ -17,10 +17,5 @@
             "tags": [],
             "exclude": ["require-await"]
         }
-    },
-    "imports": {
-        "@floooh/fibs": "jsr:@floooh/fibs@^0.1.4",
-        "@std/fs": "jsr:@std/fs@^1.0.21",
-        "@std/path": "jsr:@std/path@^1.1.4"
     }
 }
