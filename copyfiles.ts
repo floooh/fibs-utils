@@ -27,7 +27,7 @@
 */
 import * as fibs from 'jsr:@floooh/fibs';
 import * as fs from 'jsr:@std/fs';
-import * as path from 'jsr:@std/path'
+import * as path from 'jsr:@std/path';
 
 type CopyFilesArgs = {
     srcDir?: string;

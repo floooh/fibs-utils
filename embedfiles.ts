@@ -25,7 +25,7 @@ function help() {
         { name: 'outHeader', type: 'string', desc: 'path of generated header file' },
         { name: 'prefix?', type: 'string', desc: "optional prefix for C array name (default: 'embed_')" },
         { name: 'list?', type: 'boolean', desc: 'if true, generate a table of content' },
-        { name: 'asText?', type: 'boolean', desc: 'if true embed as zero-terminated string '},
+        { name: 'asText?', type: 'boolean', desc: 'if true embed as zero-terminated string ' },
     ], 'generate C header with embedded binary file data');
 }
 
@@ -105,6 +105,6 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: EmbedFi
                 str += '};\n';
             }
             await Deno.writeTextFile(outputs[0], str);
-        }
+        },
     };
 }

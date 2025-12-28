@@ -175,13 +175,23 @@ function getDefaultSlang(p: fibs.Project): string {
         return 'spirv_vk';
     } else {
         // no platform definition found, use
-        let slang = 'glsl430'
+        let slang = 'glsl430';
         switch (p.platform()) {
-            case 'macos': slang = 'metal_macos'; break;
-            case 'ios': slang = 'metal_ios'; break;
-            case 'windows': slang = 'hlsl5'; break;
-            case 'emscripten': slang = 'glsl300es'; break;
-            case 'android': slang = 'glsl300es'; break;
+            case 'macos':
+                slang = 'metal_macos';
+                break;
+            case 'ios':
+                slang = 'metal_ios';
+                break;
+            case 'windows':
+                slang = 'hlsl5';
+                break;
+            case 'emscripten':
+                slang = 'glsl300es';
+                break;
+            case 'android':
+                slang = 'glsl300es';
+                break;
         }
         fibs.log.info(`# sokolshdc: no SOKOL_* backend definition found, selected ${slang}`);
         return slang;
