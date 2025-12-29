@@ -25,14 +25,20 @@
       },
     });
 */
-import { Config, Configurer, log, Project, Target, util } from 'jsr:@floooh/fibs';
+import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs';
 import { copySync } from 'jsr:@std/fs';
 import { dirname } from 'jsr:@std/path';
 
-type CopyFilesArgs = {
+type Args = {
     srcDir?: string;
     dstDir?: string;
     files: string[];
+};
+
+const schema: Schema = {
+    srcDir: { type: 'string', optional: true, desc: 'base dir to copy from (default: target source directory)' },
+    dstDir: { type: 'string', optional: true, desc: 'base dir to copy to (default: target asset directory' },
+    files: { type: 'string[]', optional: false, desc: 'list of files to copy relative to srcDir' },
 };
 
 export function configure(c: Configurer) {
@@ -40,34 +46,26 @@ export function configure(c: Configurer) {
 }
 
 function help() {
-    log.helpJob('copyfiles', [
-        { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: target.dir)' },
-        { name: 'dstDir?', type: 'string', desc: 'base dir to copy to (default: project.targetAssetdDir())' },
-        { name: 'files', type: 'string[]', desc: 'list of files to copy' },
-    ], 'copy files from source to destination dir');
+    log.helpJob('copyfiles', 'copy files from src to dst dir', schema);
 }
 
-function validate(args: CopyFilesArgs) {
-    return util.validateArgs(args, {
-        srcDir: { type: 'string', optional: true },
-        dstDir: { type: 'string', optional: true },
-        files: { type: 'string[]', optional: false },
-    });
+function validate(args: unknown) {
+    return util.validate(args, schema);
 }
 
-function buildJob(p: Project, c: Config, t: Target, args: CopyFilesArgs) {
+function buildJob(p: Project, c: Config, t: Target, args: unknown) {
     const {
         srcDir = t.dir,
         dstDir = p.targetAssetsDir(t.name, c.name),
         files,
-    } = args;
+    } = util.safeCast<Args>(args, schema);
     return {
         name: 'copyfiles',
         inputs: files.map((file) => `${srcDir}/${file}`),
         outputs: files.map((file) => `${dstDir}/${file}`),
         addOutputsToTargetSources: false,
         args: { srcDir, dstDir, files },
-        func: async (inputs: string[], outputs: string[], _args: CopyFilesArgs): Promise<void> => {
+        func: async (inputs: string[], outputs: string[], _args: Args): Promise<void> => {
             if (util.dirty(inputs, outputs)) {
                 for (let i = 0; i < inputs.length; i++) {
                     const from = inputs[i];

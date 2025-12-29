@@ -3,12 +3,12 @@
 
     // FIXME: description
 */
-import { Configurer, Project, Config, Target, log, util } from 'jsr:@floooh/fibs';
-import { dirname, basename } from 'jsr:@std/path';
+import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs';
+import { basename, dirname } from 'jsr:@std/path';
 
 const VERSION = 1;
 
-type SokolShdcArgs = {
+type Args = {
     srcDir?: string;
     outDir?: string;
     src: string;
@@ -21,6 +21,19 @@ type SokolShdcArgs = {
     errfmt?: string;
 };
 
+const schema: Schema = {
+    srcDir: { type: 'string', optional: true, desc: 'optional source dir (default: target source dir)' },
+    outDir: { type: 'string', optional: true, desc: 'optional output dir (default: target build dir)' },
+    src: { type: 'string', optional: false, desc: 'GLSL source path (relative to srcDir)' },
+    out: { type: 'string', optional: true, desc: 'optional output filename relative to outDir (default: derived from src' },
+    slang: { type: 'string', optional: true, desc: 'optional shader language (default: derived from build config)' },
+    fmt: { type: 'string', optional: true, desc: 'optional output format (default: sokol)' },
+    defines: { type: 'string[]', optional: true, desc: 'optional shader compilation defines' },
+    module: { type: 'string', optional: true, desc: 'optional module prefix override' },
+    reflection: { type: 'boolean', optional: true, desc: 'enable/disable reflection generation (default: false)' },
+    errfmt: { type: 'string', optional: true, desc: 'optional error output format' },
+};
+
 export function configure(c: Configurer) {
     c.addImport({
         name: 'sokol-shdc',
@@ -30,36 +43,14 @@ export function configure(c: Configurer) {
 }
 
 function help() {
-    log.helpJob('sokolshdc', [
-        { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: target.dir)' },
-        { name: 'outDir?', type: 'string', desc: 'optional output directory (default: project.targetBuildDir())' },
-        { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
-        { name: 'out?', type: 'string', desc: 'optional output filename (default: derived from src)' },
-        { name: 'slang?', type: 'string', desc: 'optional output shader language arg (default: dervived from build config)' },
-        { name: 'fmt?', type: 'string', desc: 'optional output format (default: sokol)' },
-        { name: 'defines?', type: 'string[]', desc: 'optional shader compilation definitions' },
-        { name: 'module?', type: 'string', desc: 'optional module prefix override' },
-        { name: 'reflection?', type: 'boolean', desc: 'enable/disable reflection generation' },
-        { name: 'errfmt?', type: 'string', desc: 'error output format (gcc or msvc)' },
-    ], 'run sokol shader compiler');
+    log.helpJob('sokolshdc', 'run sokol shader compiler', schema);
 }
 
-function validate(args: SokolShdcArgs) {
-    return util.validateArgs(args, {
-        srcDir: { type: 'string', optional: true },
-        outDir: { type: 'string', optional: true },
-        src: { type: 'string', optional: false },
-        out: { type: 'string', optional: true },
-        slang: { type: 'string', optional: true },
-        fmt: { type: 'string', optional: true },
-        defines: { type: 'string[]', optional: true },
-        module: { type: 'string', optional: true },
-        reflection: { type: 'boolean', optional: true },
-        errfmt: { type: 'string', optional: true },
-    });
+function validate(args: unknown) {
+    return util.validate(args, schema);
 }
 
-function buildJob(p: Project, c: Config, t: Target, args: SokolShdcArgs) {
+function buildJob(p: Project, c: Config, t: Target, args: unknown) {
     const {
         srcDir = t.dir,
         outDir = p.targetBuildDir(t.name, c.name),
@@ -71,7 +62,7 @@ function buildJob(p: Project, c: Config, t: Target, args: SokolShdcArgs) {
         module,
         reflection = false,
         errfmt,
-    } = args;
+    } = util.safeCast<Args>(args, schema);
     return {
         name: 'sokolshdc',
         inputs: [`${srcDir}/${src}`],
@@ -89,7 +80,7 @@ function buildJob(p: Project, c: Config, t: Target, args: SokolShdcArgs) {
             reflection,
             errfmt,
         },
-        func: async (inputs: string[], outputs: string[], args: SokolShdcArgs) => {
+        func: async (inputs: string[], outputs: string[], args: Args) => {
             if (util.dirty(inputs, outputs)) {
                 util.ensureDir(dirname(outputs[0]));
                 const shdcArgs = [

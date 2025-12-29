@@ -1,10 +1,10 @@
 /*
     FIXME: describe embedfiles
 */
-import { Config, Configurer, log, Project, Target, util } from 'jsr:@floooh/fibs';
+import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs';
 import { basename, dirname } from 'jsr:@std/path';
 
-type EmbedFilesArgs = {
+type Args = {
     dir?: string;
     files: string[];
     outHeader: string;
@@ -13,37 +13,28 @@ type EmbedFilesArgs = {
     asText?: boolean;
 };
 
+const schema: Schema = {
+    dir: { type: 'string', optional: true, desc: 'base dir of files to embed (default: target source dir)' },
+    files: { type: 'string[]', optional: false, desc: 'list of files to embed' },
+    outHeader: { type: 'string', optional: false, desc: 'path of generated header file' },
+    prefix: { type: 'string', optional: true, desc: 'optional prefix for C array name (default: embed_)' },
+    list: { type: 'boolean', optional: true, desc: 'if true, generate a table of content' },
+    asText: { type: 'boolean', optional: true, desc: 'if true, embed as zero-terminated string' },
+};
+
 export function configure(c: Configurer) {
     c.addJob({ name: 'embedfiles', help, validate, build: buildJob });
 }
 
 function help() {
-    log.helpJob('embedfiles', [
-        { name: 'dir?', type: 'string', desc: 'base directory of files to embed (default: target.dir)' },
-        { name: 'files', type: 'string[]', desc: 'list of files to embed' },
-        { name: 'outHeader', type: 'string', desc: 'path of generated header file' },
-        { name: 'prefix?', type: 'string', desc: "optional prefix for C array name (default: 'embed_')" },
-        { name: 'list?', type: 'boolean', desc: 'if true, generate a table of content' },
-        { name: 'asText?', type: 'boolean', desc: 'if true embed as zero-terminated string ' },
-    ], 'generate C header with embedded binary file data');
+    log.helpJob('embedfiles', 'generate C header with embedded binary file data', schema);
 }
 
-function validate(args: EmbedFilesArgs) {
-    const res = util.validateArgs(args, {
-        dir: { type: 'string', optional: true },
-        files: { type: 'string[]', optional: false },
-        outHeader: { type: 'string', optional: false },
-        prefix: { type: 'string', optional: true },
-        list: { type: 'boolean', optional: true },
-        asText: { type: 'boolean', optional: true },
-    });
-    return {
-        valid: res.valid,
-        hints: res.hints,
-    };
+function validate(args: unknown) {
+    return util.validate(args, schema);
 }
 
-function buildJob(p: Project, c: Config, t: Target, args: EmbedFilesArgs) {
+function buildJob(p: Project, c: Config, t: Target, args: unknown) {
     const {
         dir = t.dir,
         files,
@@ -51,14 +42,14 @@ function buildJob(p: Project, c: Config, t: Target, args: EmbedFilesArgs) {
         prefix = 'embed_',
         list = false,
         asText = false,
-    } = args;
+    } = util.safeCast<Args>(args, schema);
     return {
         name: 'embedfiles',
         inputs: files.map((file) => `${dir}/${file}`),
         outputs: [`${dir}/${outHeader}`],
         addOutputsToTargetSources: true,
         args: { dir, files, outHeader, prefix, list, asText },
-        func: async (inputs: string[], outputs: string[], args: EmbedFilesArgs): Promise<void> => {
+        func: async (inputs: string[], outputs: string[], args: Args): Promise<void> => {
             if (!util.dirty(inputs, outputs)) {
                 return;
             }
