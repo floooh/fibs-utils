@@ -1,9 +1,8 @@
 /*
     FIXME: describe embedfiles
 */
-import * as fibs from 'jsr:@floooh/fibs';
-import * as fs from 'jsr:@std/fs';
-import * as path from 'jsr:@std/path';
+import { Config, Configurer, log, Project, Target, util } from 'jsr:@floooh/fibs';
+import { basename, dirname } from 'jsr:@std/path';
 
 type EmbedFilesArgs = {
     dir?: string;
@@ -14,12 +13,12 @@ type EmbedFilesArgs = {
     asText?: boolean;
 };
 
-export function configure(c: fibs.Configurer) {
+export function configure(c: Configurer) {
     c.addJob({ name: 'embedfiles', help, validate, build: buildJob });
 }
 
 function help() {
-    fibs.log.helpJob('embedfiles', [
+    log.helpJob('embedfiles', [
         { name: 'dir?', type: 'string', desc: 'base directory of files to embed (default: target.dir)' },
         { name: 'files', type: 'string[]', desc: 'list of files to embed' },
         { name: 'outHeader', type: 'string', desc: 'path of generated header file' },
@@ -30,7 +29,7 @@ function help() {
 }
 
 function validate(args: EmbedFilesArgs) {
-    const res = fibs.util.validateArgs(args, {
+    const res = util.validateArgs(args, {
         dir: { type: 'string', optional: true },
         files: { type: 'string[]', optional: false },
         outHeader: { type: 'string', optional: false },
@@ -44,7 +43,7 @@ function validate(args: EmbedFilesArgs) {
     };
 }
 
-function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: EmbedFilesArgs): fibs.Job {
+function buildJob(p: Project, c: Config, t: Target, args: EmbedFilesArgs) {
     const {
         dir = t.dir,
         files,
@@ -60,10 +59,10 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: EmbedFi
         addOutputsToTargetSources: true,
         args: { dir, files, outHeader, prefix, list, asText },
         func: async (inputs: string[], outputs: string[], args: EmbedFilesArgs): Promise<void> => {
-            if (!fibs.util.dirty(inputs, outputs)) {
+            if (!util.dirty(inputs, outputs)) {
                 return;
             }
-            await fs.ensureDir(path.dirname(outputs[0]));
+            util.ensureDir(dirname(outputs[0]));
             let items: { name: string; cname: string; size: number }[] = [];
             let str = '';
             str += '#pragma once\n';
@@ -71,9 +70,9 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: EmbedFi
             str += '#include <stdint.h>\n';
             str += '#include <stddef.h>\n';
             for (const input of inputs) {
-                fibs.log.info(`# embed ${input} => ${outputs[0]}`);
+                log.info(`# embed ${input} => ${outputs[0]}`);
                 const bytes = await Deno.readFile(input);
-                const name = path.basename(input).replace('.', '_');
+                const name = basename(input).replace('.', '_');
                 const cname = `${args.prefix}${name}`;
                 items.push({ name, cname, size: bytes.length });
                 if (args.asText) {

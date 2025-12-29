@@ -3,9 +3,8 @@
 
     // FIXME: description
 */
-import * as fibs from 'jsr:@floooh/fibs';
-import * as fs from 'jsr:@std/fs';
-import * as path from 'jsr:@std/path';
+import { Configurer, Project, Config, Target, log, util } from 'jsr:@floooh/fibs';
+import { dirname, basename } from 'jsr:@std/path';
 
 const VERSION = 1;
 
@@ -22,7 +21,7 @@ type SokolShdcArgs = {
     errfmt?: string;
 };
 
-export function configure(c: fibs.Configurer) {
+export function configure(c: Configurer) {
     c.addImport({
         name: 'sokol-shdc',
         url: 'https://github.com/floooh/sokol-tools-bin',
@@ -31,7 +30,7 @@ export function configure(c: fibs.Configurer) {
 }
 
 function help() {
-    fibs.log.helpJob('sokolshdc', [
+    log.helpJob('sokolshdc', [
         { name: 'srcDir?', type: 'string', desc: 'optional source directory (default: target.dir)' },
         { name: 'outDir?', type: 'string', desc: 'optional output directory (default: project.targetBuildDir())' },
         { name: 'src', type: 'string', desc: 'GLSL source path (relative to srcDir)' },
@@ -46,7 +45,7 @@ function help() {
 }
 
 function validate(args: SokolShdcArgs) {
-    return fibs.util.validateArgs(args, {
+    return util.validateArgs(args, {
         srcDir: { type: 'string', optional: true },
         outDir: { type: 'string', optional: true },
         src: { type: 'string', optional: false },
@@ -60,12 +59,12 @@ function validate(args: SokolShdcArgs) {
     });
 }
 
-function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: SokolShdcArgs) {
+function buildJob(p: Project, c: Config, t: Target, args: SokolShdcArgs) {
     const {
         srcDir = t.dir,
         outDir = p.targetBuildDir(t.name, c.name),
         src,
-        out = `${path.basename(src)}.h`,
+        out = `${basename(src)}.h`,
         slang = getDefaultSlang(p),
         fmt = 'sokol',
         defines,
@@ -91,8 +90,8 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: SokolSh
             errfmt,
         },
         func: async (inputs: string[], outputs: string[], args: SokolShdcArgs) => {
-            if (fibs.util.dirty(inputs, outputs)) {
-                await fs.ensureDir(path.dirname(outputs[0]));
+            if (util.dirty(inputs, outputs)) {
+                util.ensureDir(dirname(outputs[0]));
                 const shdcArgs = [
                     '--input',
                     inputs[0],
@@ -117,7 +116,7 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: SokolSh
                 if (reflection === true) {
                     shdcArgs.push('--reflection');
                 }
-                const res = await fibs.util.runCmd(getShdcPath(p), {
+                const res = await util.runCmd(getShdcPath(p), {
                     args: shdcArgs,
                     cwd: p.dir(),
                     showCmd: true,
@@ -132,7 +131,7 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: SokolSh
     };
 }
 
-function getShdcPath(p: fibs.Project): string {
+function getShdcPath(p: Project): string {
     let dir;
     if (p.isHostWindows()) {
         dir = 'win32';
@@ -144,34 +143,34 @@ function getShdcPath(p: fibs.Project): string {
     return `${p.importsDir()}/sokol-tools-bin/bin/${dir}/sokol-shdc`;
 }
 
-function getDefaultSlang(p: fibs.Project): string {
+function getDefaultSlang(p: Project): string {
     if (p.findCompileDefinition('SOKOL_GLCORE')) {
-        fibs.log.info('# sokolshdc: found SOKOL_GLCORE definition, using glsl430');
+        log.info('# sokolshdc: found SOKOL_GLCORE definition, using glsl430');
         return 'glsl430';
     } else if (p.findCompileDefinition('SOKOL_GLES3')) {
         if (p.isAndroid()) {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using glsl310es');
+            log.info('# sokolshdc: found SOKOL_GLES3 definition and android platform, using glsl310es');
             return 'glsl310es';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_GLES3 definition, using glsl300es');
+            log.info('# sokolshdc: found SOKOL_GLES3 definition, using glsl300es');
             return 'glsl300es';
         }
     } else if (p.findCompileDefinition('SOKOL_D3D11')) {
-        fibs.log.info('# sokolshdc: found SOKOL_D3D11 definition, using hlsl5');
+        log.info('# sokolshdc: found SOKOL_D3D11 definition, using hlsl5');
         return 'hlsl5';
     } else if (p.findCompileDefinition('SOKOL_METAL')) {
         if (p.isMacOS()) {
-            fibs.log.info('# sokolshdc: found SOKOL_METAL definition and macos platform, using metal_macos');
+            log.info('# sokolshdc: found SOKOL_METAL definition and macos platform, using metal_macos');
             return 'metal_macos';
         } else {
-            fibs.log.info('# sokolshdc: found SOKOL_METAL definition and ios platform, using metal_ios');
+            log.info('# sokolshdc: found SOKOL_METAL definition and ios platform, using metal_ios');
             return 'metal_ios';
         }
     } else if (p.findCompileDefinition('SOKOL_WGPU')) {
-        fibs.log.info('# sokolshdc: found SOKOL_WGPU definition, using wgsl');
+        log.info('# sokolshdc: found SOKOL_WGPU definition, using wgsl');
         return 'wgsl';
     } else if (p.findCompileDefinition('SOKOL_VULKAN')) {
-        fibs.log.info('# sokolshdc: found SOKOL_VULKAN definition, using spirv_vk');
+        log.info('# sokolshdc: found SOKOL_VULKAN definition, using spirv_vk');
         return 'spirv_vk';
     } else {
         // no platform definition found, use
@@ -193,12 +192,12 @@ function getDefaultSlang(p: fibs.Project): string {
                 slang = 'glsl300es';
                 break;
         }
-        fibs.log.info(`# sokolshdc: no SOKOL_* backend definition found, selected ${slang}`);
+        log.info(`# sokolshdc: no SOKOL_* backend definition found, selected ${slang}`);
         return slang;
     }
 }
 
-function getErrFmt(p: fibs.Project, errfmt: string | undefined): string {
+function getErrFmt(p: Project, errfmt: string | undefined): string {
     if (errfmt !== undefined) {
         return errfmt;
     } else if (p.isMsvc()) {

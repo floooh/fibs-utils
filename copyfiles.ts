@@ -25,9 +25,9 @@
       },
     });
 */
-import * as fibs from 'jsr:@floooh/fibs';
-import * as fs from 'jsr:@std/fs';
-import * as path from 'jsr:@std/path';
+import { Config, Configurer, log, Project, Target, util } from 'jsr:@floooh/fibs';
+import { copySync } from 'jsr:@std/fs';
+import { dirname } from 'jsr:@std/path';
 
 type CopyFilesArgs = {
     srcDir?: string;
@@ -35,12 +35,12 @@ type CopyFilesArgs = {
     files: string[];
 };
 
-export function configure(c: fibs.Configurer) {
+export function configure(c: Configurer) {
     c.addJob({ name: 'copyfiles', help, validate, build: buildJob });
 }
 
 function help() {
-    fibs.log.helpJob('copyfiles', [
+    log.helpJob('copyfiles', [
         { name: 'srcDir?', type: 'string', desc: 'base dir to copy from (default: target.dir)' },
         { name: 'dstDir?', type: 'string', desc: 'base dir to copy to (default: project.targetAssetdDir())' },
         { name: 'files', type: 'string[]', desc: 'list of files to copy' },
@@ -48,14 +48,14 @@ function help() {
 }
 
 function validate(args: CopyFilesArgs) {
-    return fibs.util.validateArgs(args, {
+    return util.validateArgs(args, {
         srcDir: { type: 'string', optional: true },
         dstDir: { type: 'string', optional: true },
         files: { type: 'string[]', optional: false },
     });
 }
 
-function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: CopyFilesArgs) {
+function buildJob(p: Project, c: Config, t: Target, args: CopyFilesArgs) {
     const {
         srcDir = t.dir,
         dstDir = p.targetAssetsDir(t.name, c.name),
@@ -68,13 +68,13 @@ function buildJob(p: fibs.Project, c: fibs.Config, t: fibs.Target, args: CopyFil
         addOutputsToTargetSources: false,
         args: { srcDir, dstDir, files },
         func: async (inputs: string[], outputs: string[], _args: CopyFilesArgs): Promise<void> => {
-            if (fibs.util.dirty(inputs, outputs)) {
+            if (util.dirty(inputs, outputs)) {
                 for (let i = 0; i < inputs.length; i++) {
                     const from = inputs[i];
                     const to = outputs[i];
-                    fibs.log.info(`# cp ${from} ${to}`);
-                    await fs.ensureDir(path.dirname(to));
-                    await fs.copy(from, to, { overwrite: true });
+                    log.info(`# cp ${from} ${to}`);
+                    util.ensureDir(dirname(to));
+                    copySync(from, to, { overwrite: true });
                 }
             }
         },
