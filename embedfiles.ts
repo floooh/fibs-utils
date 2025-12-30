@@ -11,6 +11,7 @@ type Args = {
     prefix?: string;
     list?: boolean;
     asText?: boolean;
+    asConst?: boolean;
 };
 
 const schema: Schema = {
@@ -20,6 +21,7 @@ const schema: Schema = {
     prefix: { type: 'string', optional: true, desc: 'optional prefix for C array name (default: embed_)' },
     list: { type: 'boolean', optional: true, desc: 'if true, generate a table of content' },
     asText: { type: 'boolean', optional: true, desc: 'if true, embed as zero-terminated string' },
+    asConst: { type: 'boolean', optional: true, desc: 'if true, emit const data (default: true)' },
 };
 
 export function configure(c: Configurer) {
@@ -42,6 +44,7 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
         prefix = 'embed_',
         list = false,
         asText = false,
+        asConst = true,
     } = util.safeCast<Args>(args, schema);
     return {
         name: 'embedfiles',
@@ -65,11 +68,12 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
                 const bytes = await Deno.readFile(input);
                 const name = basename(input).replace('.', '_');
                 const cname = `${args.prefix}${name}`;
+                const constStr = asConst ? 'const ' : '';
                 items.push({ name, cname, size: bytes.length });
                 if (args.asText) {
-                    str += `static char ${cname}[${bytes.length + 1}] = {\n`;
+                    str += `static ${constStr}char ${cname}[${bytes.length + 1}] = {\n`;
                 } else {
-                    str += `static const uint8_t ${cname}[${bytes.length}] = {\n`;
+                    str += `static ${constStr}uint8_t ${cname}[${bytes.length}] = {\n`;
                 }
                 for (const [i, byte] of bytes.entries()) {
                     str += `0x${byte.toString(16).padStart(2, '0')}, `;
