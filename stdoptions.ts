@@ -4,11 +4,19 @@ import { Builder } from 'jsr:@floooh/fibs';
 export function build(b: Builder) {
     if (b.isMsvc()) {
         b.addCompileOptions(['/W4', '/EHsc']);
+        b.addCompileOptions({ opts: ['/O2'], buildMode: 'release' });
         b.addCompileDefinitions({ _CRT_SECURE_NO_WARNINGS: '1' });
+        // link-time-code-generation flags
+        b.addCompileOptions({ opts: ['/GL'], buildMode: 'release' });
+        b.addLinkOptions({ opts: ['/LTCG'], buildMode: 'release' });
     } else {
         b.addCompileOptions(['-Wall', '-Wextra']);
+        b.addCompileOptions({ opts: ['-O3'], buildMode: 'release' });
+        const common_release_opts = ['-flto'];
+        b.addCompileOptions({ opts: common_release_opts, buildMode: 'release' });
+        b.addLinkOptions({ opts: common_release_opts, buildMode: 'release' });
         const common_cxx_opts = ['-fno-exceptions', '-fno-rtti'];
-        b.addCompileOptions({ language: 'cxx', opts: common_cxx_opts });
-        b.addLinkOptions({ language: 'cxx', opts: common_cxx_opts });
+        b.addCompileOptions({ opts: common_cxx_opts, language: 'cxx' });
+        b.addLinkOptions({ opts: common_cxx_opts, language: 'cxx' });
     }
 }
