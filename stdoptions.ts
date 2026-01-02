@@ -12,11 +12,14 @@ export function build(b: Builder) {
     } else {
         b.addCompileOptions(['-Wall', '-Wextra', '-Wno-missing-field-initializers']);
         b.addCompileOptions({ opts: ['-O3'], buildMode: 'release' });
-        const common_release_opts = ['-flto'];
-        b.addCompileOptions({ opts: common_release_opts, buildMode: 'release' });
-        b.addLinkOptions({ opts: common_release_opts, buildMode: 'release' });
         const common_cxx_opts = ['-fno-exceptions', '-fno-rtti'];
         b.addCompileOptions({ opts: common_cxx_opts, language: 'cxx' });
         b.addLinkOptions({ opts: common_cxx_opts, language: 'cxx' });
+        // only enable LTO on Clang, since GCC's LTO implementation sucks
+        if (b.isClang()) {
+            const lto = ['-flto'];
+            b.addCompileOptions({ opts: lto, buildMode: 'release' });
+            b.addLinkOptions({ opts: lto, buildMode: 'release' });
+        }
     }
 }
