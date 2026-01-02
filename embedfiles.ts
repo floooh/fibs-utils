@@ -12,6 +12,7 @@ type Args = {
     list?: boolean;
     asText?: boolean;
     asConst?: boolean;
+    noStatic?: boolean;
 };
 
 const schema: Schema = {
@@ -22,6 +23,7 @@ const schema: Schema = {
     list: { type: 'boolean', optional: true, desc: 'if true, generate a table of content' },
     asText: { type: 'boolean', optional: true, desc: 'if true, embed as zero-terminated string' },
     asConst: { type: 'boolean', optional: true, desc: 'if true, emit const data (default: true)' },
+    noStatic: { type: 'boolean', optional: true, desc: "if true, don't emit static data (default: false)" },
 };
 
 export function configure(c: Configurer) {
@@ -45,6 +47,7 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
         list = false,
         asText = false,
         asConst = true,
+        noStatic = false,
     } = util.safeCast<Args>(args, schema);
     return {
         name: 'embedfiles',
@@ -58,6 +61,8 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
             }
             util.ensureDir(dirname(outputs[0]));
             let items: { name: string; cname: string; size: number }[] = [];
+            const constStr = asConst ? 'const ' : '';
+            const staticStr = noStatic ? '' : 'static ';
             let str = '';
             str += '#pragma once\n';
             str += '// machine generated, do not edit!\n';
@@ -68,12 +73,11 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
                 const bytes = await Deno.readFile(input);
                 const name = basename(input).replace('.', '_');
                 const cname = `${args.prefix}${name}`;
-                const constStr = asConst ? 'const ' : '';
                 items.push({ name, cname, size: bytes.length });
                 if (args.asText) {
-                    str += `static ${constStr}char ${cname}[${bytes.length + 1}] = {\n`;
+                    str += `${staticStr}${constStr}char ${cname}[${bytes.length + 1}] = {\n`;
                 } else {
-                    str += `static ${constStr}uint8_t ${cname}[${bytes.length}] = {\n`;
+                    str += `${staticStr}${constStr}uint8_t ${cname}[${bytes.length}] = {\n`;
                 }
                 for (const [i, byte] of bytes.entries()) {
                     str += `0x${byte.toString(16).padStart(2, '0')}, `;
@@ -91,7 +95,7 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
                 str += `typedef struct { const char* name; const uint8_t* ptr; size_t size; } ${args.prefix}item_t;\n`;
                 const numItemsDefine = `${args.prefix!.toUpperCase()}NUM_ITEMS`;
                 str += `#define ${numItemsDefine} (${inputs.length})\n`;
-                str += `static const ${args.prefix}item_t ${args.prefix}items[${numItemsDefine}] = {\n`;
+                str += `${staticStr}${constStr}${args.prefix}item_t ${args.prefix}items[${numItemsDefine}] = {\n`;
                 items = items.toSorted((a, b) => a.name.localeCompare(b.name));
                 for (const item of items) {
                     str += `{ "${item.name}", ${item.cname}, ${item.size} },\n`;
