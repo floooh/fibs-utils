@@ -10,7 +10,7 @@ export function build(b: Builder) {
         b.addCompileOptions({ opts: ['/GL'], buildMode: 'release' });
         b.addLinkOptions({ opts: ['/LTCG'], buildMode: 'release' });
     } else {
-        b.addCompileOptions(['-Wall', '-Wextra']);
+        b.addCompileOptions(['-Wall', '-Wextra', '-Wno-missing-field-initializers']);
         b.addCompileOptions({ opts: ['-O3'], buildMode: 'release' });
         const common_release_opts = ['-flto'];
         b.addCompileOptions({ opts: common_release_opts, buildMode: 'release' });
