@@ -12,7 +12,7 @@ type Args = {
     list?: boolean;
     asText?: boolean;
     asConst?: boolean;
-    noStatic?: boolean;
+    asStatic?: boolean;
 };
 
 const schema: Schema = {
@@ -20,10 +20,10 @@ const schema: Schema = {
     files: { type: 'string[]', optional: false, desc: 'list of files to embed' },
     outHeader: { type: 'string', optional: false, desc: 'path of generated header file' },
     prefix: { type: 'string', optional: true, desc: 'optional prefix for C array name (default: embed_)' },
-    list: { type: 'boolean', optional: true, desc: 'if true, generate a table of content' },
-    asText: { type: 'boolean', optional: true, desc: 'if true, embed as zero-terminated string' },
+    list: { type: 'boolean', optional: true, desc: 'if true, generate a table of content (default: false)' },
+    asText: { type: 'boolean', optional: true, desc: 'if true, embed as zero-terminated string (default: false)' },
     asConst: { type: 'boolean', optional: true, desc: 'if true, emit const data (default: true)' },
-    noStatic: { type: 'boolean', optional: true, desc: "if true, don't emit static data (default: false)" },
+    asStatic: { type: 'boolean', optional: true, desc: "if true, emit static data (default: true)" },
 };
 
 export function configure(c: Configurer) {
@@ -47,7 +47,7 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
         list = false,
         asText = false,
         asConst = true,
-        noStatic = false,
+        asStatic = true,
     } = util.safeCast<Args>(args, schema);
     return {
         name: 'embedfiles',
@@ -62,7 +62,7 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
             util.ensureDir(dirname(outputs[0]));
             let items: { name: string; cname: string; size: number }[] = [];
             const constStr = asConst ? 'const ' : '';
-            const staticStr = noStatic ? '' : 'static ';
+            const staticStr = asStatic ? 'static ' : '';
             let str = '';
             str += '#pragma once\n';
             str += '// machine generated, do not edit!\n';
