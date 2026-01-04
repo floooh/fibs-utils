@@ -111,7 +111,6 @@ function buildJob(p: Project, c: Config, t: Target, args: unknown) {
                     args: shdcArgs,
                     cwd: p.dir(),
                     showCmd: true,
-                    abortOnError: false,
                     winUseCmd: true,
                 });
                 if (res.exitCode !== 0) {
