@@ -1,8 +1,8 @@
 /*
     FIXME: describe embedfiles
 */
-import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs';
-import { basename, dirname } from 'jsr:@std/path';
+import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs@^1';
+import { basename, dirname } from 'jsr:@std/path@^1';
 
 type Args = {
     dir?: string;

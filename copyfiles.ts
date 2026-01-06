@@ -25,9 +25,9 @@
       },
     });
 */
-import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs';
-import { copySync } from 'jsr:@std/fs';
-import { dirname } from 'jsr:@std/path';
+import { Config, Configurer, log, Project, Schema, Target, util } from 'jsr:@floooh/fibs@^1';
+import { copySync } from 'jsr:@std/fs@^1';
+import { dirname } from 'jsr:@std/path@^1';
 
 type Args = {
     srcDir?: string;

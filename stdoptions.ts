@@ -1,5 +1,5 @@
 // a collection of 'opinionated' standard compile options for inclusion in other projects
-import { Builder } from 'jsr:@floooh/fibs';
+import { Builder } from 'jsr:@floooh/fibs@^1';
 
 export function build(b: Builder) {
     if (b.isMsvc()) {
