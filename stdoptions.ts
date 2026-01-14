@@ -3,7 +3,11 @@ import { Builder } from 'jsr:@floooh/fibs@^1';
 
 export function build(b: Builder) {
     if (b.isMsvc()) {
-        b.addCompileOptions(['/W4', '/EHsc']);
+        // warning level 4
+        // minimal exception handling
+        // multithreaded compilation
+        // static stdlib
+        b.addCompileOptions(['/W4', '/EHsc', '/MP', '/MT']);
         b.addCompileOptions({ opts: ['/O2'], buildMode: 'release' });
         b.addCompileDefinitions({ _CRT_SECURE_NO_WARNINGS: '1' });
         // link-time-code-generation flags
