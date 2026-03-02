@@ -1,3 +1,4 @@
 # fibs-utils
 
-Common helpers and utilities for fibs projects.
+> [!NOTE]
+> The content of this repository has been moved to https://github.com/floooh/fibs-extras
