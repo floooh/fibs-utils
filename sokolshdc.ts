@@ -153,8 +153,8 @@ function getDefaultSlang(p: Project): string {
             log.info('# sokolshdc: found SOKOL_METAL definition and macos platform, using metal_macos');
             return 'metal_macos';
         } else {
-            log.info('# sokolshdc: found SOKOL_METAL definition and ios platform, using metal_ios');
-            return 'metal_ios';
+            log.info('# sokolshdc: found SOKOL_METAL definition and ios platform, using metal_ios:metal_sim');
+            return 'metal_ios:metal_sim';
         }
     } else if (p.findCompileDefinition('SOKOL_WGPU')) {
         log.info('# sokolshdc: found SOKOL_WGPU definition, using wgsl');
@@ -170,7 +170,7 @@ function getDefaultSlang(p: Project): string {
                 slang = 'metal_macos';
                 break;
             case 'ios':
-                slang = 'metal_ios';
+                slang = 'metal_ios:metal_sim';
                 break;
             case 'windows':
                 slang = 'hlsl5';
